@@ -1,0 +1,355 @@
+/* BASE */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0d0f14;
+    color: #e0e0e0;
+}
+
+/* HEADER */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: #11141a;
+    border-bottom: 1px solid #1f232c;
+    font-weight: bold;
+}
+
+.mode-switch {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* BUTTON COMMON */
+#flashBtn,
+#modeLabel {
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow:
+        0 3px 8px rgba(0,0,0,0.35),
+        inset 0 1px 1px rgba(255,255,255,0.15);
+}
+
+#flashBtn:hover,
+#modeLabel:hover {
+    transform: translateY(-1px);
+}
+
+/* FLASH */
+#flashBtn {
+    background: linear-gradient(180deg,#2c7be5,#1a5fb4);
+}
+
+#flashBtn.flash-on {
+    background: linear-gradient(180deg,#ffc34d,#f2a10a);
+    color: black;
+}
+
+/* MODE */
+.mode-manual {
+    background: linear-gradient(180deg,#ff4a4a,#c92121);
+}
+
+.mode-auto {
+    background: linear-gradient(180deg,#34c759,#1f8f3c);
+}
+
+/* MAIN */
+.container {
+    width: 92%;
+    margin: auto;
+    margin-top: 20px;
+}
+
+/* SECTION */
+section {
+    background: #14171f;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #22262f;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+h2 {
+    margin-top: 0;
+    color: #e44;
+}
+
+/* CAMERA */
+.camera-box {
+    position: relative;
+    width: 420px;
+    max-width: 100%;
+    height: 260px;
+    margin: 0 auto 15px;
+    background: #0b0e13;
+    border-radius: 14px;
+    border: 1px solid #1f232c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#camera {
+    width: 100%;
+}
+
+/* OVERLAY */
+.camera-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 14px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #ddd;
+    background: rgba(0,0,0,0.4);
+}
+
+.cam-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.live-dot {
+    color: #ff3b3b;
+    animation: blink 1s infinite;
+}
+
+.cam-status {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    letter-spacing: 2px;
+    opacity: 0.8;
+}
+
+/* ANIMATION */
+@keyframes blink {
+    0% {opacity: 1;}
+    50% {opacity: 0.3;}
+    100% {opacity: 1;}
+}
+
+/* BUTTON ROW */
+.btn-row {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+}
+
+.start { background: #2e7d32; }
+.stop  { background: #c62828; }
+
+/* GRID LAYOUT */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: stretch;
+}
+
+/* CONTROL PANEL */
+.control {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.control-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* STATUS TEXT */
+.joy-status {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e44;
+    padding: 4px 10px;
+    border: 1px solid #e44;
+    border-radius: 6px;
+    background: rgba(228,68,68,0.1);
+}
+
+/* CONTROL BUTTONS */
+.btn-control {
+    width: 200px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.mid-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.ctrl-btn {
+    width: 65px;
+    height: 65px;
+    background: #1e2533;
+    border: 2px solid #e44;
+    border-radius: 12px;
+    font-size: 28px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.ctrl-btn:hover {
+    background: #e44;
+}
+
+.stop-btn {
+    background: #c62828;
+    border-color: #c62828;
+}
+
+.stop-btn:hover {
+    background: #ff4444;
+}
+
+/* CARD (RIGHT PANEL) */
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #14171f;
+    border-radius: 12px;
+    border: 1px solid #22262f;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* SECTIONS */
+.section {
+    padding: 12px 0;
+}
+
+.section + .section {
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* SPEED */
+.speed-info {
+    margin-bottom: 10px;
+}
+
+#speedSlider {
+    width: 100%;
+    cursor: pointer;
+}
+
+/* STATUS ITEMS */
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    font-size: 15px;
+}
+
+.status-item span:last-child {
+    font-weight: bold;
+    color: #4fd1c5;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    color: #999;
+    padding: 16px;
+    font-size: 13px;
+}
+
+/* MOBILE */
+@media (max-width:768px) {
+
+    header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .mode-switch {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .camera-box {
+        width: 100%;
+        height: 55vw;
+    }
+
+    .btn-row {
+        flex-direction: column;
+    }
+
+    .btn-control {
+        width: 220px;
+    }
+
+    .ctrl-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 32px;
+    }
+}
+
+/* DISABLED BUTTON */
+.ctrl-btn:disabled {
+    background: #0f1520;
+    border-color: #333;
+    color: #555;
+    cursor: not-allowed;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.7);
+    transform: translateY(2px);
+}
+/* FIX ANDROID HOLD BUTTON */
+
+.ctrl-btn,
+.stop-btn {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ctrl-btn span,
+.stop-btn span {
+    pointer-events: none;
+}

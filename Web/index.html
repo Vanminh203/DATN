@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<title>Smart Follow Robot</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<div>🤖 SMART FOLLOW ROBOT</div>
+
+<div class="mode-switch">
+
+<button id="flashBtn" onclick="toggleFlash()">Flash OFF</button>
+
+<button id="modeLabel" class="mode-auto" onclick="toggleMode()">
+Mode: Auto
+</button>
+
+</div>
+
+</header>
+
+
+<div class="container">
+
+<!-- CAMERA -->
+
+<div class="camera-box">
+
+    <div class="camera-overlay" id="cameraOverlay">
+
+        <div class="cam-header">
+            <span>ESP32-CAM</span>
+            <span class="live-dot">● LIVE</span>
+        </div>
+
+        <div class="cam-status">
+            NO VIDEO SIGNAL
+        </div>
+
+    </div>
+
+    <img id="camera" hidden>
+
+</div>
+
+</div>
+
+<div class="btn-row">
+
+<button class="btn start" onclick="startStream()">
+Start Stream
+</button>
+
+<button class="btn stop" onclick="stopStream()">
+Stop Stream
+</button>
+
+</div>
+
+<div class="grid">
+<section class="control">
+
+<div class="control-header">
+
+<h2>Control Panel</h2>
+
+<div class="joy-status" id="joyStatus">
+STOP
+</div>
+
+</div>
+
+<div class="btn-control">
+
+<button class="ctrl-btn" data-cmd="forward">▲</button>
+
+<div class="mid-row">
+
+<button class="ctrl-btn" data-cmd="left">◄</button>
+
+<button class="ctrl-btn stop-btn">■</button>
+
+<button class="ctrl-btn" data-cmd="right">►</button>
+
+</div>
+
+<button class="ctrl-btn" data-cmd="backward">▼</button>
+
+</div>
+
+</section>
+
+<div class="card">
+
+<div class="section">
+
+<div class="speed-info">
+    Set Speed:
+    <span id="speedValue">150</span>
+</div>
+
+<div class="speed-info">
+    Actual Speed:
+    <span id="actualSpeedValue">0</span>
+</div>
+
+<input
+type="range"
+id="speedSlider"
+min="0"
+max="255"
+value="150"
+class="slider"
+>
+
+</div>
+
+<div class="section status">
+
+<h2>Status</h2>
+
+<div class="status-item">
+    <span>Move</span>
+    <span id="moveValue">Stop</span>
+</div>
+
+<div class="status-item">
+
+<span>Distance</span>
+
+<span id="distanceValue">
+-- cm
+</span>
+
+</div>
+
+<div class="status-item">
+
+<span>Detected Object</span>
+
+<span id="objectValue">
+None
+</span>
+
+</div>
+
+<div class="status-item">
+
+<span>Confidence</span>
+
+<span id="confidenceValue">
+0.00
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<footer>
+
+</footer>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+<script src="script.js"></script>
+
+</body>
+</html>
