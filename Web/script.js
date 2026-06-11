@@ -1,21 +1,19 @@
 /*  CONFIG  */
-
-const ESP32_URL = "http://192.168.207.100";
-const PI_STREAM = "http://192.168.207.208:5000/video";
-
-const MQTT_BROKER = "ws://192.168.207.12:9001";
+const ESP32_URL = "http://10.102.183.100";
+const PI_STREAM = "http://10.102.183.12:5000/video";
+const MQTT_BROKER = "ws://10.102.183.12:9001";
 
 let mode = "Auto";
 let flashlight = false;
+const AUTO_SET_SPEED = 5;
+const DEFAULT_MANUAL_SPEED = 30;
 
+let manualSpeedValue = DEFAULT_MANUAL_SPEED;
 /*  MQTT TOPICS  */
-
 const CMD_TOPIC         = "control/move";
 const MODE_TOPIC        = "control/mode";
-const UI_TOPIC          = "ui/state";
 const SPEED_TOPIC       = "control/speed";
 const ROBOT_STATE_TOPIC = "robot/state";
-
 /*  DOM  */
 
 const camera = document.getElementById("camera");
@@ -37,8 +35,14 @@ let isDraggingSpeed = false;
 let speedPublishTimer = null;
 let pendingSpeedValue = null;
 
-/*  STREAM  */
+function setSpeedUI(value) {
+    if (!speedSlider || !speedValue) return;
 
+    speedSlider.value = value;
+    speedValue.innerText = value;
+}
+
+/*  STREAM  */
 function startStream() {
     if (!camera || !cameraOverlay) return;
 
@@ -70,7 +74,6 @@ const client = mqtt.connect(MQTT_BROKER);
 client.on("connect", () => {
     console.log("MQTT Connected");
 
-    client.subscribe(UI_TOPIC);
     client.subscribe(SPEED_TOPIC);
     client.subscribe(ROBOT_STATE_TOPIC);
 });
@@ -88,36 +91,20 @@ client.on("error", (err) => {
 });
 
 client.on("message", (topic, msg) => {
-    if (topic === UI_TOPIC) {
-        let data = {};
-        try {
-            data = JSON.parse(msg.toString());
-        } catch (e) {
-            console.log("UI_TOPIC JSON parse error", e);
-            return;
-        }
-
-        if (data.mode !== undefined) {
-            mode = data.mode;
-            updateModeUI();
-        }
-
-        if (data.flash !== undefined) {
-            flashlight = data.flash;
-            updateFlashUI();
-        }
-
-        if (data.joy !== undefined && joyStatus) {
-            joyStatus.innerText = data.joy;
-        }
-    }
 
     if (topic === SPEED_TOPIC) {
-        const speed = parseInt(msg.toString(), 10);
+            const speed = parseInt(msg.toString(), 10);
 
-        if (!isNaN(speed) && speedSlider && speedValue && !isDraggingSpeed) {
-            speedSlider.value = speed;
-            speedValue.innerText = speed;
+    if (isNaN(speed)) return;
+
+    if (mode === "Manual") {
+        manualSpeedValue = speed;
+
+        if (!isDraggingSpeed) {
+            setSpeedUI(manualSpeedValue);
+        }
+        } else {
+            setSpeedUI(AUTO_SET_SPEED);
         }
     }
 
@@ -130,18 +117,20 @@ client.on("message", (topic, msg) => {
             return;
         }
 
-        if (data.mode !== undefined) {
+        if (data.mode !== undefined && data.mode !== mode) {
             mode = data.mode;
             updateModeUI();
         }
-
-        // Chỉ update slider khi người dùng không đang kéo
         if (data.requestedSpeed !== undefined) {
-            if (speedSlider && speedValue && !isDraggingSpeed) {
-                speedSlider.value = data.requestedSpeed;
-                speedValue.innerText = data.requestedSpeed;
-            }
+            if (mode === "Manual") {
+                manualSpeedValue = Number(data.requestedSpeed);
+        if (!isDraggingSpeed) {
+            setSpeedUI(manualSpeedValue);
         }
+        } else {
+            setSpeedUI(AUTO_SET_SPEED);
+        }
+    }
 
         if (data.appliedSpeed !== undefined && actualSpeedValue) {
             actualSpeedValue.innerText = data.appliedSpeed;
@@ -163,22 +152,7 @@ client.on("message", (topic, msg) => {
     }
 });
 
-/*  UI SYNC  */
-
-function broadcastUI() {
-    if (!client.connected) return;
-
-    const data = {
-        mode: mode,
-        flash: flashlight,
-        joy: joyStatus ? joyStatus.innerText : "STOP"
-    };
-
-    client.publish(UI_TOPIC, JSON.stringify(data));
-}
-
 /*  MODE  */
-
 function toggleMode() {
     mode = (mode === "Auto") ? "Manual" : "Auto";
 
@@ -189,30 +163,36 @@ function toggleMode() {
     if (client.connected) {
         client.publish(MODE_TOPIC, mode);
         console.log("Published mode:", mode);
+        client.publish(CMD_TOPIC, "stop");
     } else {
         console.log("MQTT not connected, mode not published");
     }
 
-    broadcastUI();
 }
-
 function updateModeUI() {
+    const isAuto = mode === "Auto";
+
     if (modeLabel) {
         modeLabel.innerText = "Mode: " + mode;
         modeLabel.classList.remove("mode-auto", "mode-manual");
-        modeLabel.classList.add(mode === "Auto" ? "mode-auto" : "mode-manual");
+        modeLabel.classList.add(isAuto ? "mode-auto" : "mode-manual");
     }
 
     document.querySelectorAll(".ctrl-btn")
-        .forEach(b => b.disabled = (mode === "Auto"));
+        .forEach(btn => btn.disabled = isAuto);
 
     if (speedSlider) {
-        speedSlider.disabled = (mode === "Auto");
+        speedSlider.disabled = isAuto;
+    }
+
+    if (isAuto) {
+        setSpeedUI(AUTO_SET_SPEED);
+    } else if (!isDraggingSpeed) {
+        setSpeedUI(manualSpeedValue);
     }
 }
 
 /*  FLASH  */
-
 function toggleFlash() {
     flashlight = !flashlight;
 
@@ -226,7 +206,6 @@ function toggleFlash() {
     fetch(`${ESP32_URL}/control?var=led_intensity&val=${val}`)
         .catch(err => console.log("Flash request error:", err));
 
-    broadcastUI();
 }
 
 function updateFlashUI() {
@@ -237,7 +216,6 @@ function updateFlashUI() {
 }
 
 /*  SEND MOVE  */
-
 function sendMove(cmd) {
     if (mode === "Auto") {
         if (joyStatus) joyStatus.innerText = "STOP";
@@ -257,12 +235,9 @@ function sendMove(cmd) {
     } else {
         console.log("MQTT not connected, move not published");
     }
-
-    broadcastUI();
 }
 
 /*  CONTROL BUTTON  */
-
 function controlButtonSetup() {
     let isHolding = false;
     let holdCmd = "";
@@ -345,41 +320,39 @@ function scheduleSpeedPublish(val) {
             publishSpeedNow(pendingSpeedValue);
         }
         speedPublishTimer = null;
-    }, 150); // Android thường mượt hơn với 120-180ms
+    }, 150); 
 }
 
 if (speedSlider) {
     speedSlider.disabled = true;
 
     const onSliderInput = () => {
-        let val = parseInt(speedSlider.value, 10);
-        if (isNaN(val)) val = 0;
+    if (mode !== "Manual") return;
 
-        // cập nhật local ngay để nhìn mượt
-        if (speedValue) {
-            speedValue.innerText = val;
-        }
+    let val = parseInt(speedSlider.value, 10);
+    if (isNaN(val)) val = 0;
 
-        // publish có tiết chế
-        scheduleSpeedPublish(val);
-    };
+    manualSpeedValue = val;
+    setSpeedUI(manualSpeedValue);
+
+    scheduleSpeedPublish(manualSpeedValue);
+};
 
     const dragStart = () => {
         isDraggingSpeed = true;
     };
 
     const dragEnd = () => {
+        if (mode !== "Manual") return;
+
         let val = parseInt(speedSlider.value, 10);
         if (isNaN(val)) val = 0;
 
         isDraggingSpeed = false;
+        manualSpeedValue = val;
 
-        if (speedValue) {
-            speedValue.innerText = val;
-        }
-
-        // chốt giá trị cuối cùng
-        publishSpeedNow(val);
+        setSpeedUI(manualSpeedValue);
+        publishSpeedNow(manualSpeedValue);
     };
 
     speedSlider.addEventListener("input", onSliderInput);
@@ -395,12 +368,10 @@ if (speedSlider) {
 }
 
 /*  BLOCK CONTEXT MENU  */
-
 document.addEventListener("contextmenu", (e) => {
     e.preventDefault();
 });
 
 /*  INITIAL UI  */
-
 updateModeUI();
 updateFlashUI();
